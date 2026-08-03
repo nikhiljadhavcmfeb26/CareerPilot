@@ -1,0 +1,10 @@
+target/
+*.class
+.idea/
+*.iml
+.vscode/
+.DS_Store
+.mvn/wrapper/maven-wrapper.jar
+
+# Resumes uploaded at runtime (user-service app.upload-dir)
+uploads/
