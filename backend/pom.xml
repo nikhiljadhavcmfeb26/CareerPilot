@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>com.careerpilot</groupId>
+  <artifactId>careerpilot-backend</artifactId>
+  <version>1.0.0</version>
+  <packaging>pom</packaging>
+
+  <name>CareerPilot Backend</name>
+  <description>Maven multi-module parent for the CareerPilot Spring Boot microservices</description>
+
+  <properties>
+    <java.version>21</java.version>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+
+    <!-- Keep these two versions aligned: see https://spring.io/projects/spring-cloud for the compatibility matrix -->
+    <spring-boot.version>3.3.5</spring-boot.version>
+    <spring-cloud.version>2023.0.3</spring-cloud.version>
+
+    <jjwt.version>0.12.6</jjwt.version>
+
+    <!--
+      springdoc-openapi 2.6.x is the line built for Spring Boot 3.3.x - see
+      https://springdoc.org/#what-is-the-compatibility-matrix-of-springdoc-openapi-with-spring-boot
+      Added in Phase 7: Swagger/OpenAPI was missing from every module.
+    -->
+    <springdoc.version>2.6.0</springdoc.version>
+  </properties>
+
+  <!--
+    Modules are added incrementally, one microservice at a time, per the agreed build order:
+    config-server -> eureka-server -> api-gateway -> auth-service -> user-service -> job-service
+    -> application-service -> notification-service -> ai-service.
+    This keeps `mvn clean install` from the root always building only what actually exists.
+  -->
+  <modules>
+    <module>config-server</module>
+    <module>eureka-server</module>
+    <module>api-gateway</module>
+    <module>common</module>
+    <module>auth-service</module>
+    <module>user-service</module>
+    <module>job-service</module>
+    <module>application-service</module>
+    <module>notification-service</module>
+    <module>ai-service</module>
+  </modules>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-dependencies</artifactId>
+        <version>${spring-boot.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.springframework.cloud</groupId>
+        <artifactId>spring-cloud-dependencies</artifactId>
+        <version>${spring-cloud.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
+  <build>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.springframework.boot</groupId>
+          <artifactId>spring-boot-maven-plugin</artifactId>
+          <version>${spring-boot.version}</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-compiler-plugin</artifactId>
+          <configuration>
+            <release>${java.version}</release>
+            <parameters>true</parameters>
+          </configuration>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+  </build>
+
+</project>
