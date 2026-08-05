@@ -5,7 +5,20 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 
-
+/**
+ * ADMIN MODULE - platform-wide AI feature switches.
+ *
+ * Exactly one row ever exists (created by AiFeatureSettingSeeder). It lives in
+ * auth-service rather than ai-service on purpose: ai-service already asks
+ * auth-service "may this user use AI right now?" on every request in order to
+ * check the Premium subscription, so folding the admin switches into that same
+ * answer costs zero extra network hops and keeps a single authority for
+ * "is AI allowed".
+ *
+ * requirePremium=false is the deliberate escape hatch for demos and incident
+ * response: it opens every AI feature to all logged-in users of the right role
+ * without touching anyone's subscription records.
+ */
 @Entity
 @Table(name = "ai_feature_settings")
 public class AiFeatureSetting extends BaseEntity {
