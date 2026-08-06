@@ -92,27 +92,27 @@ public class JobController {
     }
 
     @DeleteMapping("/{id}")
-    public ApiResponse<Object> delete(@PathVariable int id) {
+    public ApiResponse<Void> delete(@PathVariable int id) {
         jobService.deleteJob(SecurityUtils.currentUserId(), id);
-        return ApiResponse.ok(new Object(), "Job deleted");
+        return ApiResponse.success("Job deleted");
     }
 
     @DeleteMapping("/admin/{id}")
-    public ApiResponse<Object> adminDelete(@PathVariable int id) {
+    public ApiResponse<Void> adminDelete(@PathVariable int id) {
         jobService.adminDeleteJob(id);
-        return ApiResponse.ok(new Object(), "Job deleted");
+        return ApiResponse.success("Job deleted");
     }
 
     @PutMapping("/{id}/publish")
-    public ApiResponse<Object> publish(@PathVariable int id) {
+    public ApiResponse<Void> publish(@PathVariable int id) {
         jobService.publishJob(SecurityUtils.currentUserId(), id);
-        return ApiResponse.ok(new Object(), "Job published");
+        return ApiResponse.success("Job published");
     }
 
     @PutMapping("/{id}/close")
-    public ApiResponse<Object> close(@PathVariable int id) {
+    public ApiResponse<Void> close(@PathVariable int id) {
         jobService.closeJob(SecurityUtils.currentUserId(), id);
-        return ApiResponse.ok(new Object(), "Job closed");
+        return ApiResponse.success("Job closed");
     }
 
     private <T extends Enum<T>> T toEnum(T[] values, Integer ordinal, String fieldName) {
