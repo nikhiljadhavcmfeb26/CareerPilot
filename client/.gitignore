@@ -12,6 +12,11 @@ dist
 dist-ssr
 *.local
 
+# Local API base URL override. Commit .env.example, not .env.
+.env
+.env.local
+.env.*.local
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
