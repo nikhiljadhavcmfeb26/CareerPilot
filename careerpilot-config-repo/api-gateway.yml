@@ -1,0 +1,124 @@
+server:
+  port: 8080
+
+spring:
+  cloud:
+    gateway:
+      globalcors:
+        # Ensures the CORS policy below is also applied to requests that don't
+        # match a route predicate, so a preflight for a mistyped/unmapped path
+        # still gets a CORS response instead of an opaque browser error that
+        # looks like a CORS misconfiguration.
+        add-to-simple-url-handler-mapping: true
+        cors-configurations:
+          '[/**]':
+            # allowCredentials: true forbids a wildcard origin, so these are
+            # listed explicitly. 5173 is Vite's default; 5174/5175 are what Vite
+            # silently falls back to when 5173 is already taken, which is a
+            # common and very confusing source of "CORS error" reports.
+            allowedOrigins:
+              - "http://localhost:5173"
+              - "http://localhost:5174"
+              - "http://localhost:5175"
+              - "http://localhost:4173"
+              - "http://localhost:3000"
+              - "http://127.0.0.1:5173"
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - PATCH
+              - OPTIONS
+            allowedHeaders: "*"
+            # Content-Disposition is needed so the browser can read the filename
+            # off resume/PDF downloads later; harmless to expose now.
+            exposedHeaders:
+              - "Content-Disposition"
+            allowCredentials: true
+            # Cache the preflight for an hour instead of re-issuing OPTIONS
+            # before every single authenticated request.
+            maxAge: 3600
+
+      routes:
+        # auth-service: registration, login, tokens, account/role management,
+        # subscriptions/Razorpay. /api/users/** was originally routed to
+        # user-service in the first draft of this file - corrected: it's the
+        # UsersController-equivalent (get/update self, admin activate/deactivate),
+        # which operates on the User/Role tables that live in auth-service, not
+        # on JobSeekerProfile/EmployerProfile/Company/Resume like user-service does.
+        - id: auth-service
+          uri: lb://auth-service
+          predicates:
+            - Path=/api/auth/**
+        - id: auth-service-users
+          uri: lb://auth-service
+          predicates:
+            - Path=/api/users/**
+
+        # ADMIN MODULE (auth-service). User management, subscription
+        # management, AI feature switches and the admin dashboard stats.
+        # Job and application administration are NOT here - they are routed
+        # to the services that own that data, under /api/jobs/admin/** and
+        # /api/applications/admin/**, and each enforces hasRole("Admin")
+        # itself.
+        - id: auth-service-admin
+          uri: lb://auth-service
+          predicates:
+            - Path=/api/admin/**
+
+        # Dashboard aggregation lives in auth-service (Phase 3 decision): it
+        # already owns the caller's identity and role, and fans out to
+        # job-service / application-service / user-service over OpenFeign for
+        # the figures it doesn't own. Replaces the "open design question" note
+        # that used to sit at the bottom of this file.
+        - id: auth-service-dashboard
+          uri: lb://auth-service
+          predicates:
+            - Path=/api/dashboard/**
+
+        # user-service: candidate/employer/company profiles + resumes
+        - id: user-service-companies
+          uri: lb://user-service
+          predicates:
+            - Path=/api/companies/**
+        - id: user-service-profiles
+          uri: lb://user-service
+          predicates:
+            - Path=/api/profiles/**
+        - id: user-service-resumes
+          uri: lb://user-service
+          predicates:
+            - Path=/api/resumes/**
+
+        # job-service: job CRUD/search + bookmarks
+        - id: job-service-jobs
+          uri: lb://job-service
+          predicates:
+            - Path=/api/jobs/**
+        - id: job-service-bookmarks
+          uri: lb://job-service
+          predicates:
+            - Path=/api/bookmarks/**
+
+        # application-service: apply/withdraw/status, employer resume access
+        - id: application-service
+          uri: lb://application-service
+          predicates:
+            - Path=/api/applications/**
+
+        # ai-service: resume feedback, cover letters, screening (premium)
+        - id: ai-service
+          uri: lb://ai-service
+          predicates:
+            - Path=/api/ai/**
+
+        # NOTE: notification-service has no route here on purpose - it has no
+        # client-facing endpoints in the current app (or the original .NET
+        # one). It's only ever called service-to-service via OpenFeign.
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,gateway

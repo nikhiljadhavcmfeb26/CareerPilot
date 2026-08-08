@@ -1,0 +1,58 @@
+server:
+  port: 8086
+
+spring:
+  datasource:
+    url: jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME:careerpilot_ai}?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+    username: ${DB_USERNAME:root}
+    password: ${DB_PASSWORD:root}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.MySQLDialect
+  cloud:
+    openfeign:
+      client:
+        config:
+          default:
+            connectTimeout: 5000
+            # Candidate screening fans out to user-service (resume) and
+            # auth-service (identity) per applicant - generous but bounded.
+            readTimeout: 15000
+
+# ---------------------------------------------------------------------------
+# Google Gemini
+# ---------------------------------------------------------------------------
+# The API key is read from the GEMINI_API_KEY environment variable only. There
+# is no default on purpose: if it is unset every AI endpoint fails loudly with
+# a clear message instead of silently pointing at a placeholder.
+#
+# AUTHENTICATION (this is what the 401 bug was):
+#   Google AI Studio now issues "authorization keys" that start with "AQ.".
+#   Those keys are ONLY accepted in the `x-goog-api-key` request header - the
+#   old `?key=<KEY>` query-string form returns
+#   401 ACCESS_TOKEN_TYPE_UNSUPPORTED. GeminiClient sends the header form,
+#   which also works for the legacy "AIza..." keys.
+#   See https://ai.google.dev/gemini-api/docs/api-key
+#
+# MODEL:
+#   gemini-2.0-flash (the previous value) was shut down on 1 June 2026.
+#   Google's named replacement is gemini-3.5-flash. Check
+#   https://ai.google.dev/gemini-api/docs/models before changing this, and
+#   override with GEMINI_MODEL rather than editing the file.
+gemini:
+  api-key: ${GEMINI_API_KEY:}
+  model: ${GEMINI_MODEL:gemini-3.5-flash}
+  base-url: ${GEMINI_BASE_URL:https://generativelanguage.googleapis.com/v1beta}
+  temperature: ${GEMINI_TEMPERATURE:0.4}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info

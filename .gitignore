@@ -1,0 +1,37 @@
+# ---- Build output ----
+target/
+build/
+*.class
+*.jar
+!.mvn/wrapper/maven-wrapper.jar
+
+# ---- Frontend ----
+node_modules/
+dist/
+dist-ssr/
+*.local
+
+# Local environment overrides. client/.env.example is committed as the template.
+.env
+.env.local
+.env.*.local
+
+# ---- Runtime data ----
+# Uploaded resumes live on local disk (app.upload-dir). Never commit them:
+# they are user-supplied personal documents.
+uploads/
+logs/
+*.log
+
+# ---- IDE / OS ----
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+!.vscode/extensions.json
+.settings/
+.classpath
+.project
+.DS_Store
+Thumbs.db
