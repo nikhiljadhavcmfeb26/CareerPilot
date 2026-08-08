@@ -1,0 +1,41 @@
+server:
+  port: 8888
+
+spring:
+  application:
+    name: config-server
+  cloud:
+    config:
+      server:
+        git:
+          # Points at the local careerpilot-config-repo by default so the whole
+          # platform runs out of the box with zero setup. For a real environment,
+          # push careerpilot-config-repo to an actual git remote (GitHub/GitLab)
+          # and set CONFIG_REPO_URI to that remote's URL (with credentials via
+          # CONFIG_REPO_USERNAME / CONFIG_REPO_PASSWORD if it's private).
+          # Resolved at startup by ConfigServerApplication.resolveConfigRepoUri():
+          # CONFIG_REPO_URI env var / system property wins, otherwise the
+          # careerpilot-config-repo folder is auto-discovered by walking up from
+          # the working directory. The literal fallback below only applies if
+          # both of those fail, and exists so the failure is an obvious
+          # "repo not found" rather than a silent misconfiguration.
+          uri: ${CONFIG_REPO_URI:file:./careerpilot-config-repo}
+          default-label: main
+          search-paths: '**'
+          clone-on-start: true
+          force-pull: true
+          username: ${CONFIG_REPO_USERNAME:}
+          password: ${CONFIG_REPO_PASSWORD:}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: always
+
+logging:
+  level:
+    org.springframework.cloud.config: INFO
