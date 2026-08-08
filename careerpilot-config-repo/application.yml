@@ -1,0 +1,24 @@
+# Shared defaults inherited by EVERY service that fetches config from this
+# server, regardless of spring.application.name. Per-service files
+# (eureka-server.yml, api-gateway.yml, auth-service.yml, ...) override or add
+# to this, they never need to repeat it.
+
+jwt:
+  # Dev-only fallback so the platform runs out of the box. Anything beyond a
+  # laptop demo MUST set the JWT_SECRET env var to a real, private, 32+ char
+  # secret - this one is public the moment it's in a shared repo.
+  secret: ${JWT_SECRET:CareerPilot_Dev_Only_Placeholder_Key_Replace_Before_Prod_2026}
+  expiry-minutes: ${JWT_EXPIRY_MINUTES:60}
+
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_URI:http://localhost:8761/eureka/}
+  instance:
+    prefer-ip-address: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info

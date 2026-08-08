@@ -1,0 +1,65 @@
+server:
+  port: 8081
+
+spring:
+  datasource:
+    url: jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME:careerpilot_auth}?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+    username: ${DB_USERNAME:root}
+    password: ${DB_PASSWORD:root}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    # No Flyway/Liquibase in scope for this migration, so Hibernate manages the
+    # schema directly - fine for getting every service running, but a real
+    # deployment should move to versioned migrations before going to production.
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.MySQLDialect
+  cloud:
+    openfeign:
+      client:
+        config:
+          default:
+            connectTimeout: 5000
+            readTimeout: 5000
+
+# Razorpay test-mode placeholders - replace with real keys from the Razorpay
+# dashboard via environment variables. Never commit real keys here; this file
+# lives in a git repo the config server reads from.
+razorpay:
+  key-id: ${RAZORPAY_KEY_ID:rzp_test_placeholder}
+  key-secret: ${RAZORPAY_KEY_SECRET:placeholder_secret}
+  webhook-secret: ${RAZORPAY_WEBHOOK_SECRET:}
+  premium-amount-paise: ${RAZORPAY_PREMIUM_AMOUNT_PAISE:49900}
+  premium-duration-days: ${RAZORPAY_PREMIUM_DURATION_DAYS:30}
+
+# ---------------------------------------------------------------------------
+# ADMIN MODULE
+# ---------------------------------------------------------------------------
+# The single administrator account, created by AdminSeeder on startup. There is
+# no admin self-registration: /api/auth/register only accepts Employer and
+# JobSeeker, so this is the only way the account can exist.
+#
+# The password is BCrypt-hashed before it is stored - it is never persisted or
+# logged in plain text. Override both values with ADMIN_EMAIL / ADMIN_PASSWORD
+# for anything beyond local development; the defaults below are the ones
+# published in README.md.
+#
+# admin.reset-password=true forces the password back to admin.password on the
+# next startup. Use it only to recover from a lost admin password, then unset
+# it - otherwise every restart silently undoes a deliberate password change.
+admin:
+  email: ${ADMIN_EMAIL:admin@careerpilot.com}
+  password: ${ADMIN_PASSWORD:CareerPilot@123}
+  first-name: ${ADMIN_FIRST_NAME:Platform}
+  last-name: ${ADMIN_LAST_NAME:Administrator}
+  reset-password: ${ADMIN_RESET_PASSWORD:false}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
